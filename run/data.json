@@ -1,0 +1,3024 @@
+{
+ "kpis": {
+  "peak_nats": {
+   "value": 9389712,
+   "tier": "tier1",
+   "cpus": "0-7",
+   "size": 128,
+   "conc": 1
+  },
+  "peak_redis": {
+   "value": 258621,
+   "tier": "tier3",
+   "cpus": "0",
+   "size": 128,
+   "conc": 50
+  },
+  "total_runs": 1260,
+  "parse_failures": 0
+ },
+ "cpu_scaling": {
+  "tier1": {
+   "nats": [
+    {
+     "cores": 1,
+     "throughput": 1979932
+    },
+    {
+     "cores": 4,
+     "throughput": 1886598
+    },
+    {
+     "cores": 8,
+     "throughput": 1862324
+    }
+   ],
+   "redis": [
+    {
+     "cores": 1,
+     "throughput": 141664
+    },
+    {
+     "cores": 4,
+     "throughput": 145931
+    }
+   ]
+  },
+  "tier2": {
+   "nats": [
+    {
+     "cores": 1,
+     "throughput": 75905
+    },
+    {
+     "cores": 4,
+     "throughput": 91106
+    },
+    {
+     "cores": 8,
+     "throughput": 101486
+    }
+   ],
+   "redis": [
+    {
+     "cores": 1,
+     "throughput": 130695
+    },
+    {
+     "cores": 4,
+     "throughput": 131719
+    }
+   ]
+  },
+  "tier3": {
+   "nats": [
+    {
+     "cores": 1,
+     "throughput": 84368
+    },
+    {
+     "cores": 4,
+     "throughput": 109368
+    },
+    {
+     "cores": 8,
+     "throughput": 109722
+    }
+   ],
+   "redis": [
+    {
+     "cores": 1,
+     "throughput": 88714
+    },
+    {
+     "cores": 4,
+     "throughput": 98226
+    }
+   ]
+  }
+ },
+ "by_size": {
+  "tier1": {
+   "nats": [
+    {
+     "size": 128,
+     "throughput": 7008632
+    },
+    {
+     "size": 1024,
+     "throughput": 3268146
+    },
+    {
+     "size": 8192,
+     "throughput": 613082
+    },
+    {
+     "size": 65536,
+     "throughput": 109349
+    }
+   ],
+   "redis": [
+    {
+     "size": 128,
+     "throughput": 239362
+    },
+    {
+     "size": 1024,
+     "throughput": 236220
+    },
+    {
+     "size": 8192,
+     "throughput": 191083
+    },
+    {
+     "size": 65536,
+     "throughput": 47619
+    }
+   ]
+  },
+  "tier2": {
+   "nats": [
+    {
+     "size": 128,
+     "throughput": 172392
+    },
+    {
+     "size": 1024,
+     "throughput": 170032
+    },
+    {
+     "size": 8192,
+     "throughput": 139787
+    },
+    {
+     "size": 65536,
+     "throughput": 66579
+    }
+   ],
+   "redis": [
+    {
+     "size": 128,
+     "throughput": 250000
+    },
+    {
+     "size": 1024,
+     "throughput": 247934
+    },
+    {
+     "size": 8192,
+     "throughput": 175439
+    },
+    {
+     "size": 65536,
+     "throughput": 35211
+    }
+   ]
+  },
+  "tier3": {
+   "nats": [
+    {
+     "size": 128,
+     "throughput": 179213
+    },
+    {
+     "size": 1024,
+     "throughput": 177612
+    },
+    {
+     "size": 8192,
+     "throughput": 163125
+    },
+    {
+     "size": 65536,
+     "throughput": 63785
+    }
+   ],
+   "redis": [
+    {
+     "size": 128,
+     "throughput": 249307
+    },
+    {
+     "size": 1024,
+     "throughput": 225564
+    },
+    {
+     "size": 8192,
+     "throughput": 118890
+    },
+    {
+     "size": 65536,
+     "throughput": 21053
+    }
+   ]
+  }
+ },
+ "latency": {
+  "p50": {
+   "tier1": {
+    "nats": 0.0001,
+    "redis": 0.015
+   },
+   "tier2": {
+    "nats": 0.0164,
+    "redis": 0.015
+   },
+   "tier3": {
+    "nats": 0.0167,
+    "redis": 0.015
+   }
+  },
+  "p99": {
+   "tier1": {
+    "nats": 0.0001,
+    "redis": 0.015
+   },
+   "tier2": {
+    "nats": 0.0445,
+    "redis": 0.015
+   },
+   "tier3": {
+    "nats": 0.0286,
+    "redis": 0.015
+   }
+  }
+ },
+ "io_check": {
+  "1": 97773,
+  "4": 81154
+ },
+ "table": [
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 128,
+   "conc": 1,
+   "throughput": 8308228,
+   "p50_ms": 0.0001,
+   "p99_ms": 0.0001
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 128,
+   "conc": 10,
+   "throughput": 7851580,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 128,
+   "conc": 50,
+   "throughput": 7039258,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 1,
+   "throughput": 3640245,
+   "p50_ms": 0.0001,
+   "p99_ms": 0.0057
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 10,
+   "throughput": 3515477,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 50,
+   "throughput": 3618729,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 1,
+   "throughput": 618416,
+   "p50_ms": 0.0001,
+   "p99_ms": 0.0075
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 10,
+   "throughput": 617840,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 50,
+   "throughput": 683803,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 1,
+   "throughput": 69759,
+   "p50_ms": 0.0062,
+   "p99_ms": 0.2273
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 10,
+   "throughput": 93640,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 50,
+   "throughput": 114979,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 128,
+   "conc": 1,
+   "throughput": 8828440,
+   "p50_ms": 0.0001,
+   "p99_ms": 0.0001
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 128,
+   "conc": 10,
+   "throughput": 7507194,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 128,
+   "conc": 50,
+   "throughput": 6603064,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 1,
+   "throughput": 3715554,
+   "p50_ms": 0.0001,
+   "p99_ms": 0.0058
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 10,
+   "throughput": 3311725,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 50,
+   "throughput": 3226695,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 1,
+   "throughput": 596421,
+   "p50_ms": 0.0001,
+   "p99_ms": 0.0079
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 10,
+   "throughput": 601371,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 50,
+   "throughput": 610303,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 1,
+   "throughput": 103381,
+   "p50_ms": 0.0063,
+   "p99_ms": 0.1398
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 10,
+   "throughput": 110309,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 50,
+   "throughput": 110966,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 128,
+   "conc": 1,
+   "throughput": 8368649,
+   "p50_ms": 0.0001,
+   "p99_ms": 0.0001
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 128,
+   "conc": 10,
+   "throughput": 7784335,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 128,
+   "conc": 50,
+   "throughput": 7008632,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 1,
+   "throughput": 3653173,
+   "p50_ms": 0.0001,
+   "p99_ms": 0.0058
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 10,
+   "throughput": 3415304,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 50,
+   "throughput": 3268146,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 1,
+   "throughput": 603029,
+   "p50_ms": 0.0001,
+   "p99_ms": 0.0077
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 10,
+   "throughput": 612612,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 50,
+   "throughput": 613082,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 1,
+   "throughput": 105851,
+   "p50_ms": 0.0068,
+   "p99_ms": 0.0239
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 10,
+   "throughput": 99938,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 50,
+   "throughput": 109349,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 128,
+   "conc": 1,
+   "throughput": 64184,
+   "p50_ms": 0.0138,
+   "p99_ms": 0.0379
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 128,
+   "conc": 10,
+   "throughput": 148589,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 128,
+   "conc": 50,
+   "throughput": 149335,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 1,
+   "throughput": 60603,
+   "p50_ms": 0.0145,
+   "p99_ms": 0.0362
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 10,
+   "throughput": 136537,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 50,
+   "throughput": 137308,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 1,
+   "throughput": 47366,
+   "p50_ms": 0.0176,
+   "p99_ms": 0.0572
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 10,
+   "throughput": 92352,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 50,
+   "throughput": 93109,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 1,
+   "throughput": 22451,
+   "p50_ms": 0.0366,
+   "p99_ms": 0.1332
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 10,
+   "throughput": 38093,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 50,
+   "throughput": 37488,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 128,
+   "conc": 1,
+   "throughput": 55494,
+   "p50_ms": 0.0162,
+   "p99_ms": 0.0384
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 128,
+   "conc": 10,
+   "throughput": 173055,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 128,
+   "conc": 50,
+   "throughput": 170523,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 1,
+   "throughput": 52585,
+   "p50_ms": 0.017,
+   "p99_ms": 0.0395
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 10,
+   "throughput": 168034,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 50,
+   "throughput": 165678,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 1,
+   "throughput": 43181,
+   "p50_ms": 0.0206,
+   "p99_ms": 0.0542
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 10,
+   "throughput": 132135,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 50,
+   "throughput": 130222,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 1,
+   "throughput": 21933,
+   "p50_ms": 0.0392,
+   "p99_ms": 0.1085
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 10,
+   "throughput": 59366,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 50,
+   "throughput": 59416,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 128,
+   "conc": 1,
+   "throughput": 54993,
+   "p50_ms": 0.0164,
+   "p99_ms": 0.0445
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 128,
+   "conc": 10,
+   "throughput": 182281,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 128,
+   "conc": 50,
+   "throughput": 172392,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 1,
+   "throughput": 54761,
+   "p50_ms": 0.0171,
+   "p99_ms": 0.0365
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 10,
+   "throughput": 172645,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 50,
+   "throughput": 170032,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 1,
+   "throughput": 44289,
+   "p50_ms": 0.0208,
+   "p99_ms": 0.0474
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 10,
+   "throughput": 144093,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 50,
+   "throughput": 139787,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 1,
+   "throughput": 21675,
+   "p50_ms": 0.0396,
+   "p99_ms": 0.0994
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 10,
+   "throughput": 66528,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 50,
+   "throughput": 66579,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 128,
+   "conc": 1,
+   "throughput": 66695,
+   "p50_ms": 0.0142,
+   "p99_ms": 0.0266
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 128,
+   "conc": 10,
+   "throughput": 152546,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 128,
+   "conc": 50,
+   "throughput": 150163,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 1,
+   "throughput": 63757,
+   "p50_ms": 0.0148,
+   "p99_ms": 0.0275
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 10,
+   "throughput": 145961,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 50,
+   "throughput": 143751,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 1,
+   "throughput": 52977,
+   "p50_ms": 0.0175,
+   "p99_ms": 0.0419
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 10,
+   "throughput": 102664,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 50,
+   "throughput": 100956,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 1,
+   "throughput": 20875,
+   "p50_ms": 0.041,
+   "p99_ms": 0.1179
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 10,
+   "throughput": 30577,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 50,
+   "throughput": 29433,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 128,
+   "conc": 1,
+   "throughput": 56620,
+   "p50_ms": 0.0169,
+   "p99_ms": 0.0313
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 128,
+   "conc": 10,
+   "throughput": 180821,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 128,
+   "conc": 50,
+   "throughput": 176704,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 1,
+   "throughput": 53772,
+   "p50_ms": 0.0175,
+   "p99_ms": 0.0372
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 10,
+   "throughput": 171962,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 50,
+   "throughput": 171290,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 1,
+   "throughput": 46575,
+   "p50_ms": 0.0204,
+   "p99_ms": 0.0382
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 10,
+   "throughput": 159313,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 50,
+   "throughput": 162331,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 1,
+   "throughput": 21898,
+   "p50_ms": 0.0432,
+   "p99_ms": 0.0919
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 10,
+   "throughput": 54648,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 50,
+   "throughput": 59108,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 128,
+   "conc": 1,
+   "throughput": 57749,
+   "p50_ms": 0.0167,
+   "p99_ms": 0.0286
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 128,
+   "conc": 10,
+   "throughput": 183444,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 128,
+   "conc": 50,
+   "throughput": 179213,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 1,
+   "throughput": 55807,
+   "p50_ms": 0.0171,
+   "p99_ms": 0.0299
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 10,
+   "throughput": 179066,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 50,
+   "throughput": 177612,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 1,
+   "throughput": 45810,
+   "p50_ms": 0.0205,
+   "p99_ms": 0.0421
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 10,
+   "throughput": 157443,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 50,
+   "throughput": 163125,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 1,
+   "throughput": 21189,
+   "p50_ms": 0.0436,
+   "p99_ms": 0.109
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 10,
+   "throughput": 57185,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 50,
+   "throughput": 63785,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 1,
+   "throughput": 97720,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 10,
+   "throughput": 226700,
+   "p50_ms": 0.031,
+   "p99_ms": 0.039
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 50,
+   "throughput": 243243,
+   "p50_ms": 0.111,
+   "p99_ms": 0.159
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 1,
+   "throughput": 96670,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 10,
+   "throughput": 230769,
+   "p50_ms": 0.031,
+   "p99_ms": 0.031
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 50,
+   "throughput": 236842,
+   "p50_ms": 0.111,
+   "p99_ms": 0.167
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 1,
+   "throughput": 82267,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 10,
+   "throughput": 193133,
+   "p50_ms": 0.031,
+   "p99_ms": 0.047
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 50,
+   "throughput": 193133,
+   "p50_ms": 0.135,
+   "p99_ms": 0.191
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 1,
+   "throughput": 34843,
+   "p50_ms": 0.031,
+   "p99_ms": 0.031
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 10,
+   "throughput": 47695,
+   "p50_ms": 0.127,
+   "p99_ms": 0.167
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 50,
+   "throughput": 47518,
+   "p50_ms": 0.551,
+   "p99_ms": 0.783
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 1,
+   "throughput": 81744,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 10,
+   "throughput": 213777,
+   "p50_ms": 0.047,
+   "p99_ms": 0.071
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 50,
+   "throughput": 238095,
+   "p50_ms": 0.127,
+   "p99_ms": 0.199
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 1,
+   "throughput": 81154,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 10,
+   "throughput": 209790,
+   "p50_ms": 0.047,
+   "p99_ms": 0.071
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 50,
+   "throughput": 233766,
+   "p50_ms": 0.127,
+   "p99_ms": 0.199
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 1,
+   "throughput": 70699,
+   "p50_ms": 0.015,
+   "p99_ms": 0.023
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 10,
+   "throughput": 188285,
+   "p50_ms": 0.047,
+   "p99_ms": 0.079
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 50,
+   "throughput": 195652,
+   "p50_ms": 0.143,
+   "p99_ms": 0.223
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 1,
+   "throughput": 32293,
+   "p50_ms": 0.031,
+   "p99_ms": 0.039
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 10,
+   "throughput": 51136,
+   "p50_ms": 0.119,
+   "p99_ms": 0.183
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 50,
+   "throughput": 48387,
+   "p50_ms": 0.543,
+   "p99_ms": 0.783
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 1,
+   "throughput": 98576,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 10,
+   "throughput": 240642,
+   "p50_ms": 0.023,
+   "p99_ms": 0.039
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 50,
+   "throughput": 239362,
+   "p50_ms": 0.111,
+   "p99_ms": 0.167
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 1,
+   "throughput": 95541,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 10,
+   "throughput": 229008,
+   "p50_ms": 0.031,
+   "p99_ms": 0.039
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 50,
+   "throughput": 236220,
+   "p50_ms": 0.111,
+   "p99_ms": 0.167
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 1,
+   "throughput": 82267,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 10,
+   "throughput": 197368,
+   "p50_ms": 0.031,
+   "p99_ms": 0.039
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 50,
+   "throughput": 191083,
+   "p50_ms": 0.135,
+   "p99_ms": 0.191
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 1,
+   "throughput": 34870,
+   "p50_ms": 0.031,
+   "p99_ms": 0.031
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 10,
+   "throughput": 53035,
+   "p50_ms": 0.111,
+   "p99_ms": 0.167
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 50,
+   "throughput": 47619,
+   "p50_ms": 0.543,
+   "p99_ms": 0.775
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 1,
+   "throughput": 75694,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 10,
+   "throughput": 219512,
+   "p50_ms": 0.031,
+   "p99_ms": 0.039
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 50,
+   "throughput": 229592,
+   "p50_ms": 0.119,
+   "p99_ms": 0.167
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 1,
+   "throughput": 73409,
+   "p50_ms": 0.015,
+   "p99_ms": 0.023
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 10,
+   "throughput": 210773,
+   "p50_ms": 0.031,
+   "p99_ms": 0.039
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 50,
+   "throughput": 223881,
+   "p50_ms": 0.119,
+   "p99_ms": 0.175
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 1,
+   "throughput": 66128,
+   "p50_ms": 0.015,
+   "p99_ms": 0.023
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 10,
+   "throughput": 181087,
+   "p50_ms": 0.039,
+   "p99_ms": 0.047
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 50,
+   "throughput": 177515,
+   "p50_ms": 0.151,
+   "p99_ms": 0.207
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 1,
+   "throughput": 31304,
+   "p50_ms": 0.031,
+   "p99_ms": 0.039
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 10,
+   "throughput": 48206,
+   "p50_ms": 0.127,
+   "p99_ms": 0.175
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 50,
+   "throughput": 47847,
+   "p50_ms": 0.543,
+   "p99_ms": 0.807
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 1,
+   "throughput": 93168,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 10,
+   "throughput": 245232,
+   "p50_ms": 0.023,
+   "p99_ms": 0.039
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 50,
+   "throughput": 248619,
+   "p50_ms": 0.103,
+   "p99_ms": 0.159
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 1,
+   "throughput": 89463,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 10,
+   "throughput": 245902,
+   "p50_ms": 0.031,
+   "p99_ms": 0.047
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 50,
+   "throughput": 246575,
+   "p50_ms": 0.111,
+   "p99_ms": 0.175
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 1,
+   "throughput": 69767,
+   "p50_ms": 0.015,
+   "p99_ms": 0.023
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 10,
+   "throughput": 166359,
+   "p50_ms": 0.055,
+   "p99_ms": 0.079
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 50,
+   "throughput": 177165,
+   "p50_ms": 0.239,
+   "p99_ms": 0.367
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 1,
+   "throughput": 20330,
+   "p50_ms": 0.047,
+   "p99_ms": 0.063
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 10,
+   "throughput": 34843,
+   "p50_ms": 0.247,
+   "p99_ms": 0.343
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 50,
+   "throughput": 35336,
+   "p50_ms": 1.255,
+   "p99_ms": 1.551
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 1,
+   "throughput": 77855,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 10,
+   "throughput": 190678,
+   "p50_ms": 0.047,
+   "p99_ms": 0.087
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 50,
+   "throughput": 243902,
+   "p50_ms": 0.135,
+   "p99_ms": 0.239
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 1,
+   "throughput": 74627,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 10,
+   "throughput": 176125,
+   "p50_ms": 0.055,
+   "p99_ms": 0.095
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 50,
+   "throughput": 244565,
+   "p50_ms": 0.159,
+   "p99_ms": 0.311
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 1,
+   "throughput": 61433,
+   "p50_ms": 0.015,
+   "p99_ms": 0.023
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 10,
+   "throughput": 117955,
+   "p50_ms": 0.071,
+   "p99_ms": 0.135
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 50,
+   "throughput": 138462,
+   "p50_ms": 0.279,
+   "p99_ms": 1.071
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 1,
+   "throughput": 19561,
+   "p50_ms": 0.055,
+   "p99_ms": 0.071
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 10,
+   "throughput": 31568,
+   "p50_ms": 0.271,
+   "p99_ms": 0.503
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 50,
+   "throughput": 32514,
+   "p50_ms": 1.239,
+   "p99_ms": 5.039
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 1,
+   "throughput": 93361,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 10,
+   "throughput": 241935,
+   "p50_ms": 0.031,
+   "p99_ms": 0.039
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 50,
+   "throughput": 250000,
+   "p50_ms": 0.103,
+   "p99_ms": 0.167
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 1,
+   "throughput": 89286,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 10,
+   "throughput": 242588,
+   "p50_ms": 0.031,
+   "p99_ms": 0.039
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 50,
+   "throughput": 247934,
+   "p50_ms": 0.111,
+   "p99_ms": 0.175
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 1,
+   "throughput": 70039,
+   "p50_ms": 0.015,
+   "p99_ms": 0.023
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 10,
+   "throughput": 167286,
+   "p50_ms": 0.055,
+   "p99_ms": 0.079
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 50,
+   "throughput": 175439,
+   "p50_ms": 0.239,
+   "p99_ms": 0.367
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 1,
+   "throughput": 20211,
+   "p50_ms": 0.047,
+   "p99_ms": 0.071
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 10,
+   "throughput": 34483,
+   "p50_ms": 0.255,
+   "p99_ms": 0.351
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 50,
+   "throughput": 35211,
+   "p50_ms": 1.263,
+   "p99_ms": 1.583
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 1,
+   "throughput": 71599,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 10,
+   "throughput": 220049,
+   "p50_ms": 0.031,
+   "p99_ms": 0.039
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 50,
+   "throughput": 222772,
+   "p50_ms": 0.119,
+   "p99_ms": 0.167
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 1,
+   "throughput": 69876,
+   "p50_ms": 0.015,
+   "p99_ms": 0.023
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 10,
+   "throughput": 215311,
+   "p50_ms": 0.031,
+   "p99_ms": 0.039
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 50,
+   "throughput": 220049,
+   "p50_ms": 0.119,
+   "p99_ms": 0.167
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 1,
+   "throughput": 57841,
+   "p50_ms": 0.015,
+   "p99_ms": 0.023
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 10,
+   "throughput": 178218,
+   "p50_ms": 0.039,
+   "p99_ms": 0.071
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 50,
+   "throughput": 177866,
+   "p50_ms": 0.151,
+   "p99_ms": 0.215
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 1,
+   "throughput": 18809,
+   "p50_ms": 0.055,
+   "p99_ms": 0.071
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 10,
+   "throughput": 48257,
+   "p50_ms": 0.135,
+   "p99_ms": 0.207
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 50,
+   "throughput": 48103,
+   "p50_ms": 0.551,
+   "p99_ms": 0.775
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 1,
+   "throughput": 88583,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 10,
+   "throughput": 252101,
+   "p50_ms": 0.031,
+   "p99_ms": 0.047
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 50,
+   "throughput": 254237,
+   "p50_ms": 0.111,
+   "p99_ms": 0.183
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 1,
+   "throughput": 80071,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 10,
+   "throughput": 195228,
+   "p50_ms": 0.039,
+   "p99_ms": 0.063
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 50,
+   "throughput": 207373,
+   "p50_ms": 0.167,
+   "p99_ms": 0.303
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 1,
+   "throughput": 46536,
+   "p50_ms": 0.015,
+   "p99_ms": 0.023
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 10,
+   "throughput": 89109,
+   "p50_ms": 0.071,
+   "p99_ms": 0.647
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 50,
+   "throughput": 98901,
+   "p50_ms": 0.335,
+   "p99_ms": 3.423
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 1,
+   "throughput": 11762,
+   "p50_ms": 0.063,
+   "p99_ms": 0.935
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 10,
+   "throughput": 14198,
+   "p50_ms": 0.375,
+   "p99_ms": 4.407
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 50,
+   "throughput": 14167,
+   "p50_ms": 2.079,
+   "p99_ms": 15.559
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 1,
+   "throughput": 72115,
+   "p50_ms": 0.015,
+   "p99_ms": 0.023
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 10,
+   "throughput": 161580,
+   "p50_ms": 0.055,
+   "p99_ms": 0.119
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 50,
+   "throughput": 223325,
+   "p50_ms": 0.175,
+   "p99_ms": 0.863
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 1,
+   "throughput": 65934,
+   "p50_ms": 0.015,
+   "p99_ms": 0.031
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 10,
+   "throughput": 128023,
+   "p50_ms": 0.055,
+   "p99_ms": 0.367
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 50,
+   "throughput": 162162,
+   "p50_ms": 0.215,
+   "p99_ms": 1.863
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 1,
+   "throughput": 41228,
+   "p50_ms": 0.023,
+   "p99_ms": 0.039
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 10,
+   "throughput": 65359,
+   "p50_ms": 0.087,
+   "p99_ms": 2.143
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 50,
+   "throughput": 83026,
+   "p50_ms": 0.359,
+   "p99_ms": 4.591
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 1,
+   "throughput": 11658,
+   "p50_ms": 0.063,
+   "p99_ms": 0.727
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 10,
+   "throughput": 14563,
+   "p50_ms": 0.383,
+   "p99_ms": 4.295
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 50,
+   "throughput": 16284,
+   "p50_ms": 2.063,
+   "p99_ms": 17.183
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 1,
+   "throughput": 87719,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 10,
+   "throughput": 247253,
+   "p50_ms": 0.031,
+   "p99_ms": 0.047
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 50,
+   "throughput": 249307,
+   "p50_ms": 0.111,
+   "p99_ms": 0.175
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 1,
+   "throughput": 79576,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 10,
+   "throughput": 206897,
+   "p50_ms": 0.039,
+   "p99_ms": 0.063
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 50,
+   "throughput": 225564,
+   "p50_ms": 0.167,
+   "p99_ms": 0.279
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 1,
+   "throughput": 55215,
+   "p50_ms": 0.015,
+   "p99_ms": 0.023
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 10,
+   "throughput": 113493,
+   "p50_ms": 0.071,
+   "p99_ms": 0.103
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 50,
+   "throughput": 118890,
+   "p50_ms": 0.335,
+   "p99_ms": 0.631
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 1,
+   "throughput": 15008,
+   "p50_ms": 0.063,
+   "p99_ms": 0.095
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 10,
+   "throughput": 21018,
+   "p50_ms": 0.375,
+   "p99_ms": 0.591
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 50,
+   "throughput": 21053,
+   "p50_ms": 1.879,
+   "p99_ms": 12.607
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 1,
+   "throughput": 70093,
+   "p50_ms": 0.015,
+   "p99_ms": 0.023
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 10,
+   "throughput": 215311,
+   "p50_ms": 0.031,
+   "p99_ms": 0.039
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 50,
+   "throughput": 218978,
+   "p50_ms": 0.119,
+   "p99_ms": 0.167
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 1,
+   "throughput": 65886,
+   "p50_ms": 0.015,
+   "p99_ms": 0.023
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 10,
+   "throughput": 196078,
+   "p50_ms": 0.031,
+   "p99_ms": 0.047
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 50,
+   "throughput": 202247,
+   "p50_ms": 0.119,
+   "p99_ms": 0.183
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 1,
+   "throughput": 48940,
+   "p50_ms": 0.023,
+   "p99_ms": 0.023
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 10,
+   "throughput": 151515,
+   "p50_ms": 0.039,
+   "p99_ms": 0.119
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 50,
+   "throughput": 139535,
+   "p50_ms": 0.159,
+   "p99_ms": 1.319
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 1,
+   "throughput": 15549,
+   "p50_ms": 0.055,
+   "p99_ms": 0.087
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 10,
+   "throughput": 35088,
+   "p50_ms": 0.207,
+   "p99_ms": 0.383
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 50,
+   "throughput": 36705,
+   "p50_ms": 1.039,
+   "p99_ms": 7.839
+  }
+ ]
+}

@@ -1,0 +1,3524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NATS JetStream vs Redis — Benchmark Results</title>
+<style>
+  :root {
+    --surface-1:      #fcfcfb;
+    --surface-2:      #f5f4f1;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #8c8b86;
+    --border:         #e5e4e0;
+    --series-nats:    #2a78d6;
+    --series-redis:   #1baf7a;
+    --warning:        #fab219;
+    --warning-text:   #6b4a00;
+    --warning-bg:     #fef3da;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --surface-1:      #1a1a19;
+      --surface-2:      #232322;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #8f8e86;
+      --border:         #2f2f2d;
+      --series-nats:    #3987e5;
+      --series-redis:   #199e70;
+      --warning:        #fab219;
+      --warning-text:   #ffe3a3;
+      --warning-bg:     #3a2e0f;
+    }
+  }
+  :root[data-theme="light"] {
+    --surface-1: #fcfcfb; --surface-2: #f5f4f1; --text-primary: #0b0b0b;
+    --text-secondary: #52514e; --text-muted: #8c8b86; --border: #e5e4e0;
+    --series-nats: #2a78d6; --series-redis: #1baf7a;
+    --warning: #fab219; --warning-text: #6b4a00; --warning-bg: #fef3da;
+  }
+  :root[data-theme="dark"] {
+    --surface-1: #1a1a19; --surface-2: #232322; --text-primary: #ffffff;
+    --text-secondary: #c3c2b7; --text-muted: #8f8e86; --border: #2f2f2d;
+    --series-nats: #3987e5; --series-redis: #199e70;
+    --warning: #fab219; --warning-text: #ffe3a3; --warning-bg: #3a2e0f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--surface-1); color: var(--text-primary);
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    padding: 32px 20px 64px;
+  }
+  .viz-root { max-width: 1180px; margin: 0 auto; }
+  header.page { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 28px; }
+  h1 { font-size: 22px; font-weight: 650; margin: 0 0 6px; }
+  .subtitle { color: var(--text-secondary); font-size: 13.5px; line-height: 1.5; max-width: 720px; }
+  .theme-toggle {
+    border: 1px solid var(--border); background: var(--surface-2); color: var(--text-secondary);
+    border-radius: 7px; padding: 6px 12px; font-size: 12.5px; cursor: pointer; white-space: nowrap;
+  }
+  section { margin-bottom: 36px; }
+  h2 { font-size: 15px; font-weight: 650; margin: 0 0 4px; }
+  .section-note { color: var(--text-muted); font-size: 12.5px; margin: 0 0 14px; line-height: 1.5; max-width: 760px; }
+
+  .kpi-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .stat-tile {
+    flex: 1 1 220px; border: 1px solid var(--border); background: var(--surface-2);
+    border-radius: 10px; padding: 14px 16px;
+  }
+  .stat-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
+  .stat-value { font-size: 26px; font-weight: 650; font-variant-numeric: proportional-nums; }
+  .stat-sub { font-size: 11.5px; color: var(--text-muted); margin-top: 4px; }
+  .stat-value .unit { font-size: 14px; font-weight: 500; color: var(--text-secondary); margin-left: 3px; }
+
+  .callout {
+    display: flex; gap: 10px; border: 1px solid var(--warning);
+    background: var(--warning-bg); border-radius: 10px; padding: 14px 16px;
+  }
+  .callout .icon { color: var(--warning-text); font-weight: 700; font-size: 14px; flex: 0 0 auto; }
+  .callout .body { font-size: 12.5px; color: var(--warning-text); line-height: 1.6; }
+  .callout ul { margin: 4px 0 0; padding-left: 18px; }
+
+  .panels { display: flex; gap: 14px; flex-wrap: wrap; }
+  .panel {
+    flex: 1 1 320px; border: 1px solid var(--border); background: var(--surface-2);
+    border-radius: 10px; padding: 12px 14px 8px;
+  }
+  .panel-title { font-size: 12.5px; font-weight: 600; color: var(--text-secondary); margin-bottom: 2px; }
+  svg.chart { width: 100%; height: auto; overflow: visible; }
+  .grid-line { stroke: var(--border); stroke-width: 1; }
+  .axis-text { fill: var(--text-muted); font-size: 9.5px; }
+  .series-line { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .end-dot { stroke: var(--surface-2); stroke-width: 2; }
+  .end-label { font-size: 10px; font-weight: 600; }
+  .hover-x { stroke: var(--text-muted); stroke-width: 1; opacity: 0; pointer-events: none; }
+  .hit-col { fill: transparent; }
+
+  .legend { display: flex; gap: 16px; font-size: 12px; color: var(--text-secondary); margin: 4px 2px 10px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-key { width: 14px; height: 2px; border-radius: 1px; display: inline-block; }
+
+  .tooltip {
+    position: fixed; pointer-events: none; background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 10px; font-size: 11.5px; box-shadow: 0 4px 16px rgba(0,0,0,.18);
+    display: none; z-index: 10; min-width: 130px;
+  }
+  .tooltip .t-head { color: var(--text-muted); font-size: 10.5px; margin-bottom: 5px; }
+  .tooltip .t-row { display: flex; justify-content: space-between; gap: 14px; align-items: center; }
+  .tooltip .t-key { display: flex; align-items: center; gap: 5px; color: var(--text-secondary); }
+  .tooltip .t-key .stroke { width: 10px; height: 2px; border-radius: 1px; display: inline-block; }
+  .tooltip .t-val { font-weight: 650; font-variant-numeric: tabular-nums; }
+
+  table.data-table { border-collapse: collapse; width: 100%; font-size: 12px; }
+  table.data-table th, table.data-table td {
+    text-align: right; padding: 6px 10px; border-bottom: 1px solid var(--border);
+    font-variant-numeric: tabular-nums;
+  }
+  table.data-table th:first-child, table.data-table td:first-child,
+  table.data-table th:nth-child(2), table.data-table td:nth-child(2) { text-align: left; }
+  table.data-table th { color: var(--text-secondary); font-weight: 600; position: sticky; top: 0; background: var(--surface-2); }
+  table.data-table tr:hover td { background: var(--surface-2); }
+  .table-wrap { max-height: 480px; overflow: auto; border: 1px solid var(--border); border-radius: 10px; }
+  details.table-toggle summary {
+    cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text-secondary);
+    padding: 4px 0 12px; list-style: none;
+  }
+  details.table-toggle summary::before { content: "▸ "; }
+  details.table-toggle[open] summary::before { content: "▾ "; }
+  .dot { color: var(--series-nats); }
+  .dot.redis { color: var(--series-redis); }
+
+  footer.page {
+    border-top: 1px solid var(--border); margin-top: 40px; padding-top: 16px;
+    font-size: 11.5px; color: var(--text-muted); line-height: 1.7;
+  }
+</style>
+</head>
+<body>
+
+<div class="viz-root">
+  <header class="page">
+    <div>
+      <h1>NATS JetStream vs Redis — Throughput Benchmark</h1>
+      <div class="subtitle">
+        Single-machine, rootless Podman, 16GB memory cap per server, systems run sequentially
+        (never concurrently) to avoid CPU/cache/bandwidth contention. 90,000 messages per run,
+        4 message sizes × 3 concurrency levels × 5 repeats, across 3 durability tiers.
+      </div>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()">Toggle theme</button>
+  </header>
+
+  <section>
+    <div class="kpi-row" id="kpi-row"></div>
+  </section>
+
+  <section>
+    <div class="callout">
+      <div class="icon">⚠</div>
+      <div class="body">
+        Read the numbers below with these caveats in mind:
+        <ul>
+          <li><strong>NATS p50/p99 latency is only populated at concurrency=1.</strong>
+            <code>run.sh</code>'s <code>parse_nats_output</code> reads percentiles off the last
+            line matching <code>msgs/sec</code> — for concurrency&gt;1 that's the "aggregated stats"
+            line, which doesn't carry percentiles (those are on the following "latencies per
+            operation" line). Multi-client NATS runs recorded throughput correctly but left
+            latency columns blank — a parsing gap worth fixing in <code>run.sh</code>, not a server issue.</li>
+          <li><strong>redis-benchmark's latency values are coarsely quantized at low concurrency</strong> —
+            most concurrency=1 runs report exactly 0.015ms for p50/p95/p99 alike, a histogram-bucket
+            artifact of the tool itself, not a real flat latency distribution.</li>
+          <li><strong>Tier1 throughput compares different client concurrency models</strong>, not just
+            the two servers: <code>nats bench pub</code> is fully async/non-blocking client-side,
+            while <code>redis-benchmark</code> blocks for each reply before sending the next command.
+            The ~35× tier1 gap partly reflects that difference, not purely server-side speed.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Throughput scaling by CPU pin width</h2>
+    <p class="section-note">Median throughput across all message sizes &amp; concurrency levels, per tier, as the server's cpuset widens. Redis was only swept at 1 and 4 cores (io-threads parallelizes socket I/O only — see the IO-threads check below — so a wider cpuset wasn't expected to help; command execution stays single-threaded regardless of cores granted).</p>
+    <div class="panels" id="cpu-scaling-panels"></div>
+  </section>
+
+  <section>
+    <h2>Throughput by message size</h2>
+    <p class="section-note">Median throughput at each system's widest tested cpuset (NATS: 8 cores, Redis: 4 cores) and concurrency=50. Log-scaled y-axis — values span 3+ orders of magnitude across sizes.</p>
+    <div class="panels" id="size-panels"></div>
+  </section>
+
+  <section>
+    <h2>Latency at concurrency=1, 128B messages</h2>
+    <p class="section-note">Shown as a table rather than a chart — see the caveats above on why these numbers shouldn't be read as precisely comparable across tools.</p>
+    <div class="table-wrap" style="max-height:none;">
+      <table class="data-table" id="latency-table"></table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Redis IO-threads sanity check</h2>
+    <p class="section-note">Median throughput across every other dimension (tier, cpuset, size, concurrency), grouped only by io-threads setting.</p>
+    <div class="kpi-row" id="io-row"></div>
+  </section>
+
+  <section>
+    <details class="table-toggle">
+      <summary>Full aggregated results table (252 configurations, median of 5 repeats each)</summary>
+      <div class="table-wrap">
+        <table class="data-table" id="full-table"></table>
+      </div>
+    </details>
+  </section>
+
+  <footer class="page">
+    Config: NATS_MEM/REDIS_MEM=16g · NATS_TEST_STREAM_CAP=9GB · TEST_MSG_COUNT=90000 ·
+    TEST_WARMUP_SECONDS=15 · TEST_REPEATS=5 · host: 32 threads (SMT on) / 30GB RAM.
+    Full run: 1260/1260 runs completed, 0 parse failures, 41m57s wall time
+    (2026-07-05T17:30:11Z → 2026-07-05T18:12:08Z). Raw data: <code>results/results.csv</code>.
+  </footer>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+const DATA = {
+ "kpis": {
+  "peak_nats": {
+   "value": 9389712,
+   "tier": "tier1",
+   "cpus": "0-7",
+   "size": 128,
+   "conc": 1
+  },
+  "peak_redis": {
+   "value": 258621,
+   "tier": "tier3",
+   "cpus": "0",
+   "size": 128,
+   "conc": 50
+  },
+  "total_runs": 1260,
+  "parse_failures": 0
+ },
+ "cpu_scaling": {
+  "tier1": {
+   "nats": [
+    {
+     "cores": 1,
+     "throughput": 1979932
+    },
+    {
+     "cores": 4,
+     "throughput": 1886598
+    },
+    {
+     "cores": 8,
+     "throughput": 1862324
+    }
+   ],
+   "redis": [
+    {
+     "cores": 1,
+     "throughput": 141664
+    },
+    {
+     "cores": 4,
+     "throughput": 145931
+    }
+   ]
+  },
+  "tier2": {
+   "nats": [
+    {
+     "cores": 1,
+     "throughput": 75905
+    },
+    {
+     "cores": 4,
+     "throughput": 91106
+    },
+    {
+     "cores": 8,
+     "throughput": 101486
+    }
+   ],
+   "redis": [
+    {
+     "cores": 1,
+     "throughput": 130695
+    },
+    {
+     "cores": 4,
+     "throughput": 131719
+    }
+   ]
+  },
+  "tier3": {
+   "nats": [
+    {
+     "cores": 1,
+     "throughput": 84368
+    },
+    {
+     "cores": 4,
+     "throughput": 109368
+    },
+    {
+     "cores": 8,
+     "throughput": 109722
+    }
+   ],
+   "redis": [
+    {
+     "cores": 1,
+     "throughput": 88714
+    },
+    {
+     "cores": 4,
+     "throughput": 98226
+    }
+   ]
+  }
+ },
+ "by_size": {
+  "tier1": {
+   "nats": [
+    {
+     "size": 128,
+     "throughput": 7008632
+    },
+    {
+     "size": 1024,
+     "throughput": 3268146
+    },
+    {
+     "size": 8192,
+     "throughput": 613082
+    },
+    {
+     "size": 65536,
+     "throughput": 109349
+    }
+   ],
+   "redis": [
+    {
+     "size": 128,
+     "throughput": 239362
+    },
+    {
+     "size": 1024,
+     "throughput": 236220
+    },
+    {
+     "size": 8192,
+     "throughput": 191083
+    },
+    {
+     "size": 65536,
+     "throughput": 47619
+    }
+   ]
+  },
+  "tier2": {
+   "nats": [
+    {
+     "size": 128,
+     "throughput": 172392
+    },
+    {
+     "size": 1024,
+     "throughput": 170032
+    },
+    {
+     "size": 8192,
+     "throughput": 139787
+    },
+    {
+     "size": 65536,
+     "throughput": 66579
+    }
+   ],
+   "redis": [
+    {
+     "size": 128,
+     "throughput": 250000
+    },
+    {
+     "size": 1024,
+     "throughput": 247934
+    },
+    {
+     "size": 8192,
+     "throughput": 175439
+    },
+    {
+     "size": 65536,
+     "throughput": 35211
+    }
+   ]
+  },
+  "tier3": {
+   "nats": [
+    {
+     "size": 128,
+     "throughput": 179213
+    },
+    {
+     "size": 1024,
+     "throughput": 177612
+    },
+    {
+     "size": 8192,
+     "throughput": 163125
+    },
+    {
+     "size": 65536,
+     "throughput": 63785
+    }
+   ],
+   "redis": [
+    {
+     "size": 128,
+     "throughput": 249307
+    },
+    {
+     "size": 1024,
+     "throughput": 225564
+    },
+    {
+     "size": 8192,
+     "throughput": 118890
+    },
+    {
+     "size": 65536,
+     "throughput": 21053
+    }
+   ]
+  }
+ },
+ "latency": {
+  "p50": {
+   "tier1": {
+    "nats": 0.0001,
+    "redis": 0.015
+   },
+   "tier2": {
+    "nats": 0.0164,
+    "redis": 0.015
+   },
+   "tier3": {
+    "nats": 0.0167,
+    "redis": 0.015
+   }
+  },
+  "p99": {
+   "tier1": {
+    "nats": 0.0001,
+    "redis": 0.015
+   },
+   "tier2": {
+    "nats": 0.0445,
+    "redis": 0.015
+   },
+   "tier3": {
+    "nats": 0.0286,
+    "redis": 0.015
+   }
+  }
+ },
+ "io_check": {
+  "1": 97773,
+  "4": 81154
+ },
+ "table": [
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 128,
+   "conc": 1,
+   "throughput": 8308228,
+   "p50_ms": 0.0001,
+   "p99_ms": 0.0001
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 128,
+   "conc": 10,
+   "throughput": 7851580,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 128,
+   "conc": 50,
+   "throughput": 7039258,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 1,
+   "throughput": 3640245,
+   "p50_ms": 0.0001,
+   "p99_ms": 0.0057
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 10,
+   "throughput": 3515477,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 50,
+   "throughput": 3618729,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 1,
+   "throughput": 618416,
+   "p50_ms": 0.0001,
+   "p99_ms": 0.0075
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 10,
+   "throughput": 617840,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 50,
+   "throughput": 683803,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 1,
+   "throughput": 69759,
+   "p50_ms": 0.0062,
+   "p99_ms": 0.2273
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 10,
+   "throughput": 93640,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 50,
+   "throughput": 114979,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 128,
+   "conc": 1,
+   "throughput": 8828440,
+   "p50_ms": 0.0001,
+   "p99_ms": 0.0001
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 128,
+   "conc": 10,
+   "throughput": 7507194,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 128,
+   "conc": 50,
+   "throughput": 6603064,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 1,
+   "throughput": 3715554,
+   "p50_ms": 0.0001,
+   "p99_ms": 0.0058
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 10,
+   "throughput": 3311725,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 50,
+   "throughput": 3226695,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 1,
+   "throughput": 596421,
+   "p50_ms": 0.0001,
+   "p99_ms": 0.0079
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 10,
+   "throughput": 601371,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 50,
+   "throughput": 610303,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 1,
+   "throughput": 103381,
+   "p50_ms": 0.0063,
+   "p99_ms": 0.1398
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 10,
+   "throughput": 110309,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 50,
+   "throughput": 110966,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 128,
+   "conc": 1,
+   "throughput": 8368649,
+   "p50_ms": 0.0001,
+   "p99_ms": 0.0001
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 128,
+   "conc": 10,
+   "throughput": 7784335,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 128,
+   "conc": 50,
+   "throughput": 7008632,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 1,
+   "throughput": 3653173,
+   "p50_ms": 0.0001,
+   "p99_ms": 0.0058
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 10,
+   "throughput": 3415304,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 50,
+   "throughput": 3268146,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 1,
+   "throughput": 603029,
+   "p50_ms": 0.0001,
+   "p99_ms": 0.0077
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 10,
+   "throughput": 612612,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 50,
+   "throughput": 613082,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 1,
+   "throughput": 105851,
+   "p50_ms": 0.0068,
+   "p99_ms": 0.0239
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 10,
+   "throughput": 99938,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier1",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 50,
+   "throughput": 109349,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 128,
+   "conc": 1,
+   "throughput": 64184,
+   "p50_ms": 0.0138,
+   "p99_ms": 0.0379
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 128,
+   "conc": 10,
+   "throughput": 148589,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 128,
+   "conc": 50,
+   "throughput": 149335,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 1,
+   "throughput": 60603,
+   "p50_ms": 0.0145,
+   "p99_ms": 0.0362
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 10,
+   "throughput": 136537,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 50,
+   "throughput": 137308,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 1,
+   "throughput": 47366,
+   "p50_ms": 0.0176,
+   "p99_ms": 0.0572
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 10,
+   "throughput": 92352,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 50,
+   "throughput": 93109,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 1,
+   "throughput": 22451,
+   "p50_ms": 0.0366,
+   "p99_ms": 0.1332
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 10,
+   "throughput": 38093,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 50,
+   "throughput": 37488,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 128,
+   "conc": 1,
+   "throughput": 55494,
+   "p50_ms": 0.0162,
+   "p99_ms": 0.0384
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 128,
+   "conc": 10,
+   "throughput": 173055,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 128,
+   "conc": 50,
+   "throughput": 170523,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 1,
+   "throughput": 52585,
+   "p50_ms": 0.017,
+   "p99_ms": 0.0395
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 10,
+   "throughput": 168034,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 50,
+   "throughput": 165678,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 1,
+   "throughput": 43181,
+   "p50_ms": 0.0206,
+   "p99_ms": 0.0542
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 10,
+   "throughput": 132135,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 50,
+   "throughput": 130222,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 1,
+   "throughput": 21933,
+   "p50_ms": 0.0392,
+   "p99_ms": 0.1085
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 10,
+   "throughput": 59366,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 50,
+   "throughput": 59416,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 128,
+   "conc": 1,
+   "throughput": 54993,
+   "p50_ms": 0.0164,
+   "p99_ms": 0.0445
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 128,
+   "conc": 10,
+   "throughput": 182281,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 128,
+   "conc": 50,
+   "throughput": 172392,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 1,
+   "throughput": 54761,
+   "p50_ms": 0.0171,
+   "p99_ms": 0.0365
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 10,
+   "throughput": 172645,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 50,
+   "throughput": 170032,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 1,
+   "throughput": 44289,
+   "p50_ms": 0.0208,
+   "p99_ms": 0.0474
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 10,
+   "throughput": 144093,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 50,
+   "throughput": 139787,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 1,
+   "throughput": 21675,
+   "p50_ms": 0.0396,
+   "p99_ms": 0.0994
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 10,
+   "throughput": 66528,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier2",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 50,
+   "throughput": 66579,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 128,
+   "conc": 1,
+   "throughput": 66695,
+   "p50_ms": 0.0142,
+   "p99_ms": 0.0266
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 128,
+   "conc": 10,
+   "throughput": 152546,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 128,
+   "conc": 50,
+   "throughput": 150163,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 1,
+   "throughput": 63757,
+   "p50_ms": 0.0148,
+   "p99_ms": 0.0275
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 10,
+   "throughput": 145961,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 50,
+   "throughput": 143751,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 1,
+   "throughput": 52977,
+   "p50_ms": 0.0175,
+   "p99_ms": 0.0419
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 10,
+   "throughput": 102664,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 50,
+   "throughput": 100956,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 1,
+   "throughput": 20875,
+   "p50_ms": 0.041,
+   "p99_ms": 0.1179
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 10,
+   "throughput": 30577,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 50,
+   "throughput": 29433,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 128,
+   "conc": 1,
+   "throughput": 56620,
+   "p50_ms": 0.0169,
+   "p99_ms": 0.0313
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 128,
+   "conc": 10,
+   "throughput": 180821,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 128,
+   "conc": 50,
+   "throughput": 176704,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 1,
+   "throughput": 53772,
+   "p50_ms": 0.0175,
+   "p99_ms": 0.0372
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 10,
+   "throughput": 171962,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 50,
+   "throughput": 171290,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 1,
+   "throughput": 46575,
+   "p50_ms": 0.0204,
+   "p99_ms": 0.0382
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 10,
+   "throughput": 159313,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 50,
+   "throughput": 162331,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 1,
+   "throughput": 21898,
+   "p50_ms": 0.0432,
+   "p99_ms": 0.0919
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 10,
+   "throughput": 54648,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 50,
+   "throughput": 59108,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 128,
+   "conc": 1,
+   "throughput": 57749,
+   "p50_ms": 0.0167,
+   "p99_ms": 0.0286
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 128,
+   "conc": 10,
+   "throughput": 183444,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 128,
+   "conc": 50,
+   "throughput": 179213,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 1,
+   "throughput": 55807,
+   "p50_ms": 0.0171,
+   "p99_ms": 0.0299
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 10,
+   "throughput": 179066,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 1024,
+   "conc": 50,
+   "throughput": 177612,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 1,
+   "throughput": 45810,
+   "p50_ms": 0.0205,
+   "p99_ms": 0.0421
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 10,
+   "throughput": 157443,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 8192,
+   "conc": 50,
+   "throughput": 163125,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 1,
+   "throughput": 21189,
+   "p50_ms": 0.0436,
+   "p99_ms": 0.109
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 10,
+   "throughput": 57185,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "nats",
+   "tier": "tier3",
+   "cpus": "0-7",
+   "io_threads": null,
+   "size": 65536,
+   "conc": 50,
+   "throughput": 63785,
+   "p50_ms": null,
+   "p99_ms": null
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 1,
+   "throughput": 97720,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 10,
+   "throughput": 226700,
+   "p50_ms": 0.031,
+   "p99_ms": 0.039
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 50,
+   "throughput": 243243,
+   "p50_ms": 0.111,
+   "p99_ms": 0.159
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 1,
+   "throughput": 96670,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 10,
+   "throughput": 230769,
+   "p50_ms": 0.031,
+   "p99_ms": 0.031
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 50,
+   "throughput": 236842,
+   "p50_ms": 0.111,
+   "p99_ms": 0.167
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 1,
+   "throughput": 82267,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 10,
+   "throughput": 193133,
+   "p50_ms": 0.031,
+   "p99_ms": 0.047
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 50,
+   "throughput": 193133,
+   "p50_ms": 0.135,
+   "p99_ms": 0.191
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 1,
+   "throughput": 34843,
+   "p50_ms": 0.031,
+   "p99_ms": 0.031
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 10,
+   "throughput": 47695,
+   "p50_ms": 0.127,
+   "p99_ms": 0.167
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 50,
+   "throughput": 47518,
+   "p50_ms": 0.551,
+   "p99_ms": 0.783
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 1,
+   "throughput": 81744,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 10,
+   "throughput": 213777,
+   "p50_ms": 0.047,
+   "p99_ms": 0.071
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 50,
+   "throughput": 238095,
+   "p50_ms": 0.127,
+   "p99_ms": 0.199
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 1,
+   "throughput": 81154,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 10,
+   "throughput": 209790,
+   "p50_ms": 0.047,
+   "p99_ms": 0.071
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 50,
+   "throughput": 233766,
+   "p50_ms": 0.127,
+   "p99_ms": 0.199
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 1,
+   "throughput": 70699,
+   "p50_ms": 0.015,
+   "p99_ms": 0.023
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 10,
+   "throughput": 188285,
+   "p50_ms": 0.047,
+   "p99_ms": 0.079
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 50,
+   "throughput": 195652,
+   "p50_ms": 0.143,
+   "p99_ms": 0.223
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 1,
+   "throughput": 32293,
+   "p50_ms": 0.031,
+   "p99_ms": 0.039
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 10,
+   "throughput": 51136,
+   "p50_ms": 0.119,
+   "p99_ms": 0.183
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 50,
+   "throughput": 48387,
+   "p50_ms": 0.543,
+   "p99_ms": 0.783
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 1,
+   "throughput": 98576,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 10,
+   "throughput": 240642,
+   "p50_ms": 0.023,
+   "p99_ms": 0.039
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 50,
+   "throughput": 239362,
+   "p50_ms": 0.111,
+   "p99_ms": 0.167
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 1,
+   "throughput": 95541,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 10,
+   "throughput": 229008,
+   "p50_ms": 0.031,
+   "p99_ms": 0.039
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 50,
+   "throughput": 236220,
+   "p50_ms": 0.111,
+   "p99_ms": 0.167
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 1,
+   "throughput": 82267,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 10,
+   "throughput": 197368,
+   "p50_ms": 0.031,
+   "p99_ms": 0.039
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 50,
+   "throughput": 191083,
+   "p50_ms": 0.135,
+   "p99_ms": 0.191
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 1,
+   "throughput": 34870,
+   "p50_ms": 0.031,
+   "p99_ms": 0.031
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 10,
+   "throughput": 53035,
+   "p50_ms": 0.111,
+   "p99_ms": 0.167
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 50,
+   "throughput": 47619,
+   "p50_ms": 0.543,
+   "p99_ms": 0.775
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 1,
+   "throughput": 75694,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 10,
+   "throughput": 219512,
+   "p50_ms": 0.031,
+   "p99_ms": 0.039
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 50,
+   "throughput": 229592,
+   "p50_ms": 0.119,
+   "p99_ms": 0.167
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 1,
+   "throughput": 73409,
+   "p50_ms": 0.015,
+   "p99_ms": 0.023
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 10,
+   "throughput": 210773,
+   "p50_ms": 0.031,
+   "p99_ms": 0.039
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 50,
+   "throughput": 223881,
+   "p50_ms": 0.119,
+   "p99_ms": 0.175
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 1,
+   "throughput": 66128,
+   "p50_ms": 0.015,
+   "p99_ms": 0.023
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 10,
+   "throughput": 181087,
+   "p50_ms": 0.039,
+   "p99_ms": 0.047
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 50,
+   "throughput": 177515,
+   "p50_ms": 0.151,
+   "p99_ms": 0.207
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 1,
+   "throughput": 31304,
+   "p50_ms": 0.031,
+   "p99_ms": 0.039
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 10,
+   "throughput": 48206,
+   "p50_ms": 0.127,
+   "p99_ms": 0.175
+  },
+  {
+   "system": "redis",
+   "tier": "tier1",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 50,
+   "throughput": 47847,
+   "p50_ms": 0.543,
+   "p99_ms": 0.807
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 1,
+   "throughput": 93168,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 10,
+   "throughput": 245232,
+   "p50_ms": 0.023,
+   "p99_ms": 0.039
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 50,
+   "throughput": 248619,
+   "p50_ms": 0.103,
+   "p99_ms": 0.159
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 1,
+   "throughput": 89463,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 10,
+   "throughput": 245902,
+   "p50_ms": 0.031,
+   "p99_ms": 0.047
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 50,
+   "throughput": 246575,
+   "p50_ms": 0.111,
+   "p99_ms": 0.175
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 1,
+   "throughput": 69767,
+   "p50_ms": 0.015,
+   "p99_ms": 0.023
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 10,
+   "throughput": 166359,
+   "p50_ms": 0.055,
+   "p99_ms": 0.079
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 50,
+   "throughput": 177165,
+   "p50_ms": 0.239,
+   "p99_ms": 0.367
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 1,
+   "throughput": 20330,
+   "p50_ms": 0.047,
+   "p99_ms": 0.063
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 10,
+   "throughput": 34843,
+   "p50_ms": 0.247,
+   "p99_ms": 0.343
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 50,
+   "throughput": 35336,
+   "p50_ms": 1.255,
+   "p99_ms": 1.551
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 1,
+   "throughput": 77855,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 10,
+   "throughput": 190678,
+   "p50_ms": 0.047,
+   "p99_ms": 0.087
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 50,
+   "throughput": 243902,
+   "p50_ms": 0.135,
+   "p99_ms": 0.239
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 1,
+   "throughput": 74627,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 10,
+   "throughput": 176125,
+   "p50_ms": 0.055,
+   "p99_ms": 0.095
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 50,
+   "throughput": 244565,
+   "p50_ms": 0.159,
+   "p99_ms": 0.311
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 1,
+   "throughput": 61433,
+   "p50_ms": 0.015,
+   "p99_ms": 0.023
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 10,
+   "throughput": 117955,
+   "p50_ms": 0.071,
+   "p99_ms": 0.135
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 50,
+   "throughput": 138462,
+   "p50_ms": 0.279,
+   "p99_ms": 1.071
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 1,
+   "throughput": 19561,
+   "p50_ms": 0.055,
+   "p99_ms": 0.071
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 10,
+   "throughput": 31568,
+   "p50_ms": 0.271,
+   "p99_ms": 0.503
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 50,
+   "throughput": 32514,
+   "p50_ms": 1.239,
+   "p99_ms": 5.039
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 1,
+   "throughput": 93361,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 10,
+   "throughput": 241935,
+   "p50_ms": 0.031,
+   "p99_ms": 0.039
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 50,
+   "throughput": 250000,
+   "p50_ms": 0.103,
+   "p99_ms": 0.167
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 1,
+   "throughput": 89286,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 10,
+   "throughput": 242588,
+   "p50_ms": 0.031,
+   "p99_ms": 0.039
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 50,
+   "throughput": 247934,
+   "p50_ms": 0.111,
+   "p99_ms": 0.175
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 1,
+   "throughput": 70039,
+   "p50_ms": 0.015,
+   "p99_ms": 0.023
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 10,
+   "throughput": 167286,
+   "p50_ms": 0.055,
+   "p99_ms": 0.079
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 50,
+   "throughput": 175439,
+   "p50_ms": 0.239,
+   "p99_ms": 0.367
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 1,
+   "throughput": 20211,
+   "p50_ms": 0.047,
+   "p99_ms": 0.071
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 10,
+   "throughput": 34483,
+   "p50_ms": 0.255,
+   "p99_ms": 0.351
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 50,
+   "throughput": 35211,
+   "p50_ms": 1.263,
+   "p99_ms": 1.583
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 1,
+   "throughput": 71599,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 10,
+   "throughput": 220049,
+   "p50_ms": 0.031,
+   "p99_ms": 0.039
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 50,
+   "throughput": 222772,
+   "p50_ms": 0.119,
+   "p99_ms": 0.167
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 1,
+   "throughput": 69876,
+   "p50_ms": 0.015,
+   "p99_ms": 0.023
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 10,
+   "throughput": 215311,
+   "p50_ms": 0.031,
+   "p99_ms": 0.039
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 50,
+   "throughput": 220049,
+   "p50_ms": 0.119,
+   "p99_ms": 0.167
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 1,
+   "throughput": 57841,
+   "p50_ms": 0.015,
+   "p99_ms": 0.023
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 10,
+   "throughput": 178218,
+   "p50_ms": 0.039,
+   "p99_ms": 0.071
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 50,
+   "throughput": 177866,
+   "p50_ms": 0.151,
+   "p99_ms": 0.215
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 1,
+   "throughput": 18809,
+   "p50_ms": 0.055,
+   "p99_ms": 0.071
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 10,
+   "throughput": 48257,
+   "p50_ms": 0.135,
+   "p99_ms": 0.207
+  },
+  {
+   "system": "redis",
+   "tier": "tier2",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 50,
+   "throughput": 48103,
+   "p50_ms": 0.551,
+   "p99_ms": 0.775
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 1,
+   "throughput": 88583,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 10,
+   "throughput": 252101,
+   "p50_ms": 0.031,
+   "p99_ms": 0.047
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 50,
+   "throughput": 254237,
+   "p50_ms": 0.111,
+   "p99_ms": 0.183
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 1,
+   "throughput": 80071,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 10,
+   "throughput": 195228,
+   "p50_ms": 0.039,
+   "p99_ms": 0.063
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 50,
+   "throughput": 207373,
+   "p50_ms": 0.167,
+   "p99_ms": 0.303
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 1,
+   "throughput": 46536,
+   "p50_ms": 0.015,
+   "p99_ms": 0.023
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 10,
+   "throughput": 89109,
+   "p50_ms": 0.071,
+   "p99_ms": 0.647
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 50,
+   "throughput": 98901,
+   "p50_ms": 0.335,
+   "p99_ms": 3.423
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 1,
+   "throughput": 11762,
+   "p50_ms": 0.063,
+   "p99_ms": 0.935
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 10,
+   "throughput": 14198,
+   "p50_ms": 0.375,
+   "p99_ms": 4.407
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 50,
+   "throughput": 14167,
+   "p50_ms": 2.079,
+   "p99_ms": 15.559
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 1,
+   "throughput": 72115,
+   "p50_ms": 0.015,
+   "p99_ms": 0.023
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 10,
+   "throughput": 161580,
+   "p50_ms": 0.055,
+   "p99_ms": 0.119
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 50,
+   "throughput": 223325,
+   "p50_ms": 0.175,
+   "p99_ms": 0.863
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 1,
+   "throughput": 65934,
+   "p50_ms": 0.015,
+   "p99_ms": 0.031
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 10,
+   "throughput": 128023,
+   "p50_ms": 0.055,
+   "p99_ms": 0.367
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 50,
+   "throughput": 162162,
+   "p50_ms": 0.215,
+   "p99_ms": 1.863
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 1,
+   "throughput": 41228,
+   "p50_ms": 0.023,
+   "p99_ms": 0.039
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 10,
+   "throughput": 65359,
+   "p50_ms": 0.087,
+   "p99_ms": 2.143
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 50,
+   "throughput": 83026,
+   "p50_ms": 0.359,
+   "p99_ms": 4.591
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 1,
+   "throughput": 11658,
+   "p50_ms": 0.063,
+   "p99_ms": 0.727
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 10,
+   "throughput": 14563,
+   "p50_ms": 0.383,
+   "p99_ms": 4.295
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 50,
+   "throughput": 16284,
+   "p50_ms": 2.063,
+   "p99_ms": 17.183
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 1,
+   "throughput": 87719,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 10,
+   "throughput": 247253,
+   "p50_ms": 0.031,
+   "p99_ms": 0.047
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 128,
+   "conc": 50,
+   "throughput": 249307,
+   "p50_ms": 0.111,
+   "p99_ms": 0.175
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 1,
+   "throughput": 79576,
+   "p50_ms": 0.015,
+   "p99_ms": 0.015
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 10,
+   "throughput": 206897,
+   "p50_ms": 0.039,
+   "p99_ms": 0.063
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 1024,
+   "conc": 50,
+   "throughput": 225564,
+   "p50_ms": 0.167,
+   "p99_ms": 0.279
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 1,
+   "throughput": 55215,
+   "p50_ms": 0.015,
+   "p99_ms": 0.023
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 10,
+   "throughput": 113493,
+   "p50_ms": 0.071,
+   "p99_ms": 0.103
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 8192,
+   "conc": 50,
+   "throughput": 118890,
+   "p50_ms": 0.335,
+   "p99_ms": 0.631
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 1,
+   "throughput": 15008,
+   "p50_ms": 0.063,
+   "p99_ms": 0.095
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 10,
+   "throughput": 21018,
+   "p50_ms": 0.375,
+   "p99_ms": 0.591
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "1",
+   "size": 65536,
+   "conc": 50,
+   "throughput": 21053,
+   "p50_ms": 1.879,
+   "p99_ms": 12.607
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 1,
+   "throughput": 70093,
+   "p50_ms": 0.015,
+   "p99_ms": 0.023
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 10,
+   "throughput": 215311,
+   "p50_ms": 0.031,
+   "p99_ms": 0.039
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 128,
+   "conc": 50,
+   "throughput": 218978,
+   "p50_ms": 0.119,
+   "p99_ms": 0.167
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 1,
+   "throughput": 65886,
+   "p50_ms": 0.015,
+   "p99_ms": 0.023
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 10,
+   "throughput": 196078,
+   "p50_ms": 0.031,
+   "p99_ms": 0.047
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 1024,
+   "conc": 50,
+   "throughput": 202247,
+   "p50_ms": 0.119,
+   "p99_ms": 0.183
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 1,
+   "throughput": 48940,
+   "p50_ms": 0.023,
+   "p99_ms": 0.023
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 10,
+   "throughput": 151515,
+   "p50_ms": 0.039,
+   "p99_ms": 0.119
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 8192,
+   "conc": 50,
+   "throughput": 139535,
+   "p50_ms": 0.159,
+   "p99_ms": 1.319
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 1,
+   "throughput": 15549,
+   "p50_ms": 0.055,
+   "p99_ms": 0.087
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 10,
+   "throughput": 35088,
+   "p50_ms": 0.207,
+   "p99_ms": 0.383
+  },
+  {
+   "system": "redis",
+   "tier": "tier3",
+   "cpus": "0-3",
+   "io_threads": "4",
+   "size": 65536,
+   "conc": 50,
+   "throughput": 36705,
+   "p50_ms": 1.039,
+   "p99_ms": 7.839
+  }
+ ]
+};
+
+function toggleTheme(){
+  const r = document.documentElement;
+  const cur = r.getAttribute('data-theme');
+  const sysDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const curEffective = cur || (sysDark ? 'dark' : 'light');
+  r.setAttribute('data-theme', curEffective === 'dark' ? 'light' : 'dark');
+}
+
+function fmtNum(n){
+  if (n === null || n === undefined) return '—';
+  if (Math.abs(n) >= 1e6) return (n/1e6).toFixed(n>=1e7?0:1)+'M';
+  if (Math.abs(n) >= 1e3) return (n/1e3).toFixed(n>=1e4?0:1)+'K';
+  return String(Math.round(n));
+}
+function fmtMs(n){
+  if (n === null || n === undefined) return '—';
+  return n < 0.001 ? n.toFixed(4) : n.toFixed(4);
+}
+function esc(s){ const d=document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+// ---------- KPI tiles ----------
+function statTile(label, value, unit, sub){
+  const d = document.createElement('div');
+  d.className = 'stat-tile';
+  d.innerHTML = `<div class="stat-label"></div><div class="stat-value"></div><div class="stat-sub"></div>`;
+  d.querySelector('.stat-label').textContent = label;
+  const val = d.querySelector('.stat-value');
+  val.textContent = value;
+  if (unit) { const u = document.createElement('span'); u.className='unit'; u.textContent = unit; val.appendChild(u); }
+  d.querySelector('.stat-sub').textContent = sub || '';
+  return d;
+}
+(function renderKpis(){
+  const row = document.getElementById('kpi-row');
+  const k = DATA.kpis;
+  row.appendChild(statTile('Peak NATS throughput', fmtNum(k.peak_nats.value), 'msgs/sec',
+    `${k.peak_nats.tier}, ${k.peak_nats.cpus} cpus, ${k.peak_nats.size}B, c=${k.peak_nats.conc}`));
+  row.appendChild(statTile('Peak Redis throughput', fmtNum(k.peak_redis.value), 'msgs/sec',
+    `${k.peak_redis.tier}, ${k.peak_redis.cpus} cpus, ${k.peak_redis.size}B, c=${k.peak_redis.conc}`));
+  row.appendChild(statTile('Total runs completed', k.total_runs.toLocaleString(), '', `${k.parse_failures} parse failures`));
+  row.appendChild(statTile('Total wall time', '41', 'min 57s', 'nats+redis, all 3 tiers'));
+})();
+
+// ---------- generic line chart (ordinal x, small multiples) ----------
+function drawLineChart(svg, cfg){
+  const W = 320, H = 190, M = {top: 14, right: 14, bottom: 26, left: 46};
+  const iw = W - M.left - M.right, ih = H - M.top - M.bottom;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML = '';
+
+  const xN = cfg.xLabels.length;
+  const xPos = i => M.left + (xN === 1 ? iw/2 : i/(xN-1) * iw);
+
+  let yMinRaw = Infinity, yMaxRaw = -Infinity;
+  cfg.series.forEach(s => s.points.forEach(p => { if (p.y!=null){ yMinRaw=Math.min(yMinRaw,p.y); yMaxRaw=Math.max(yMaxRaw,p.y);} }));
+  let yMin = yMinRaw, yMax = yMaxRaw;
+  if (cfg.yLog) {
+    yMin = Math.max(yMin * 0.85, 1);
+    yMax = yMax * 1.15;
+  } else {
+    const pad = (yMax - yMin) * 0.15 || yMax * 0.1 || 1;
+    yMin = Math.max(0, yMin - pad); yMax = yMax + pad;
+  }
+  const yScale = v => {
+    if (cfg.yLog) return M.top + ih - (Math.log10(v) - Math.log10(yMin)) / (Math.log10(yMax) - Math.log10(yMin)) * ih;
+    return M.top + ih - (v - yMin) / (yMax - yMin || 1) * ih;
+  };
+
+  // y ticks
+  let ticks;
+  if (cfg.yLog) {
+    ticks = [];
+    let p = Math.pow(10, Math.floor(Math.log10(yMinRaw)));
+    const top = Math.pow(10, Math.ceil(Math.log10(yMaxRaw)));
+    while (p <= top) {
+      [1, 2, 5].forEach(mult => { const t = p * mult; if (t >= yMin && t <= yMax) ticks.push(t); });
+      p *= 10;
+    }
+    if (ticks.length < 2) { ticks = [yMin, yMax]; }
+  } else {
+    const n = 4;
+    ticks = Array.from({length: n+1}, (_, i) => yMin + (yMax-yMin) * i/n);
+  }
+  ticks.forEach(t => {
+    const y = yScale(t);
+    const line = document.createElementNS(svg.namespaceURI, 'line');
+    line.setAttribute('x1', M.left); line.setAttribute('x2', M.left+iw);
+    line.setAttribute('y1', y); line.setAttribute('y2', y);
+    line.setAttribute('class', 'grid-line');
+    svg.appendChild(line);
+    const txt = document.createElementNS(svg.namespaceURI, 'text');
+    txt.setAttribute('x', M.left - 6); txt.setAttribute('y', y+3);
+    txt.setAttribute('text-anchor', 'end'); txt.setAttribute('class', 'axis-text');
+    txt.textContent = fmtNum(t);
+    svg.appendChild(txt);
+  });
+
+  // x labels
+  cfg.xLabels.forEach((lab, i) => {
+    const txt = document.createElementNS(svg.namespaceURI, 'text');
+    txt.setAttribute('x', xPos(i)); txt.setAttribute('y', H - 6);
+    txt.setAttribute('text-anchor', 'middle'); txt.setAttribute('class', 'axis-text');
+    txt.textContent = lab;
+    svg.appendChild(txt);
+  });
+
+  // series lines + end dots + end labels
+  cfg.series.forEach(s => {
+    const pts = s.points.filter(p => p.y != null);
+    if (!pts.length) return;
+    const d = pts.map((p, i) => `${i===0?'M':'L'} ${xPos(p.i)} ${yScale(p.y)}`).join(' ');
+    const path = document.createElementNS(svg.namespaceURI, 'path');
+    path.setAttribute('d', d);
+    path.setAttribute('class', 'series-line');
+    path.setAttribute('stroke', s.color);
+    svg.appendChild(path);
+    pts.forEach((p, idx) => {
+      const c = document.createElementNS(svg.namespaceURI, 'circle');
+      c.setAttribute('cx', xPos(p.i)); c.setAttribute('cy', yScale(p.y)); c.setAttribute('r', 4);
+      c.setAttribute('fill', s.color); c.setAttribute('class', 'end-dot');
+      svg.appendChild(c);
+      if (idx === pts.length - 1) {
+        const lbl = document.createElementNS(svg.namespaceURI, 'text');
+        lbl.setAttribute('x', xPos(p.i) + 7); lbl.setAttribute('y', yScale(p.y) + 4);
+        lbl.setAttribute('class', 'end-label'); lbl.setAttribute('fill', s.color);
+        lbl.textContent = fmtNum(p.y);
+        svg.appendChild(lbl);
+      }
+    });
+  });
+
+  // hover crosshair + hit columns
+  const tooltip = document.getElementById('tooltip');
+  const hoverLine = document.createElementNS(svg.namespaceURI, 'line');
+  hoverLine.setAttribute('y1', M.top); hoverLine.setAttribute('y2', M.top+ih);
+  hoverLine.setAttribute('class', 'hover-x');
+  svg.appendChild(hoverLine);
+
+  cfg.xLabels.forEach((lab, i) => {
+    const colW = iw / xN;
+    const rect = document.createElementNS(svg.namespaceURI, 'rect');
+    rect.setAttribute('x', M.left + i*colW); rect.setAttribute('y', M.top);
+    rect.setAttribute('width', colW); rect.setAttribute('height', ih);
+    rect.setAttribute('class', 'hit-col');
+    rect.addEventListener('pointerenter', (ev) => {
+      hoverLine.setAttribute('x1', xPos(i)); hoverLine.setAttribute('x2', xPos(i));
+      hoverLine.style.opacity = 1;
+      let html = `<div class="t-head">${esc(lab)}</div>`;
+      cfg.series.forEach(s => {
+        const pt = s.points.find(p => p.i === i);
+        html += `<div class="t-row"><span class="t-key"><span class="stroke" style="background:${s.color}"></span>${esc(s.name)}</span><span class="t-val">${pt && pt.y!=null ? fmtNum(pt.y) : '—'}</span></div>`;
+      });
+      tooltip.innerHTML = html;
+      tooltip.style.display = 'block';
+    });
+    rect.addEventListener('pointermove', (ev) => {
+      tooltip.style.left = (ev.clientX + 14) + 'px';
+      tooltip.style.top = (ev.clientY + 14) + 'px';
+    });
+    rect.addEventListener('pointerleave', () => { hoverLine.style.opacity = 0; tooltip.style.display = 'none'; });
+    svg.appendChild(rect);
+  });
+}
+
+function legendFor(container, names, colors){
+  const l = document.createElement('div');
+  l.className = 'legend';
+  names.forEach((n, i) => {
+    const it = document.createElement('div'); it.className = 'legend-item';
+    it.innerHTML = `<span class="legend-key" style="background:${colors[i]}"></span>`;
+    const t = document.createElement('span'); t.textContent = n;
+    it.appendChild(t);
+    l.appendChild(it);
+  });
+  container.appendChild(l);
+}
+
+// SVG presentation attributes (fill/stroke) resolve CSS custom properties directly,
+// so colors stay live across the theme toggle instead of being baked in at render time.
+const resolvedColor = name => name === 'nats' ? 'var(--series-nats)' : 'var(--series-redis)';
+
+// ---------- CPU scaling panels ----------
+(function renderCpuScaling(){
+  const wrap = document.getElementById('cpu-scaling-panels');
+  ['tier1','tier2','tier3'].forEach(tier => {
+    const panel = document.createElement('div'); panel.className = 'panel';
+    const title = document.createElement('div'); title.className = 'panel-title'; title.textContent = tier;
+    panel.appendChild(title);
+    legendFor(panel, ['NATS','Redis'], [resolvedColor('nats'), resolvedColor('redis')]);
+    const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.setAttribute('class','chart');
+    panel.appendChild(svg);
+    wrap.appendChild(panel);
+
+    const natsPts = DATA.cpu_scaling[tier].nats;
+    const redisPts = DATA.cpu_scaling[tier].redis;
+    const xLabels = natsPts.map(p => p.cores + (p.cores===1?' core':' cores'));
+    drawLineChart(svg, {
+      xLabels,
+      yLog: false,
+      series: [
+        { name:'NATS', color: resolvedColor('nats'), points: natsPts.map((p,i)=>({i, y:p.throughput})) },
+        { name:'Redis', color: resolvedColor('redis'), points: redisPts.map((p) => ({ i: natsPts.findIndex(n=>n.cores===p.cores), y: p.throughput })) },
+      ]
+    });
+  });
+})();
+
+// ---------- throughput by size panels ----------
+(function renderBySize(){
+  const wrap = document.getElementById('size-panels');
+  const sizeLabels = { 128: '128B', 1024: '1KB', 8192: '8KB', 65536: '64KB' };
+  ['tier1','tier2','tier3'].forEach(tier => {
+    const panel = document.createElement('div'); panel.className = 'panel';
+    const title = document.createElement('div'); title.className = 'panel-title'; title.textContent = tier;
+    panel.appendChild(title);
+    legendFor(panel, ['NATS','Redis'], [resolvedColor('nats'), resolvedColor('redis')]);
+    const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.setAttribute('class','chart');
+    panel.appendChild(svg);
+    wrap.appendChild(panel);
+
+    const natsPts = DATA.by_size[tier].nats;
+    const redisPts = DATA.by_size[tier].redis;
+    drawLineChart(svg, {
+      xLabels: natsPts.map(p => sizeLabels[p.size]),
+      yLog: true,
+      series: [
+        { name:'NATS', color: resolvedColor('nats'), points: natsPts.map((p,i)=>({i, y:p.throughput})) },
+        { name:'Redis', color: resolvedColor('redis'), points: redisPts.map((p,i)=>({i, y:p.throughput})) },
+      ]
+    });
+  });
+})();
+
+// ---------- latency table ----------
+(function renderLatencyTable(){
+  const t = document.getElementById('latency-table');
+  let html = '<thead><tr><th>Tier</th><th>System</th><th>p50 (ms)</th><th>p99 (ms)</th></tr></thead><tbody>';
+  ['tier1','tier2','tier3'].forEach(tier => {
+    ['nats','redis'].forEach(sys => {
+      const p50 = DATA.latency.p50[tier][sys];
+      const p99 = DATA.latency.p99[tier][sys];
+      html += `<tr><td>${tier}</td><td><span class="dot${sys==='redis'?' redis':''}">●</span> ${sys}</td><td>${fmtMs(p50)}</td><td>${fmtMs(p99)}</td></tr>`;
+    });
+  });
+  html += '</tbody>';
+  t.innerHTML = html;
+})();
+
+// ---------- io-threads stat tiles ----------
+(function renderIoCheck(){
+  const row = document.getElementById('io-row');
+  const v1 = DATA.io_check['1'], v4 = DATA.io_check['4'];
+  const delta = ((v4 - v1) / v1 * 100).toFixed(1);
+  row.appendChild(statTile('io-threads=1 (default)', fmtNum(v1), 'msgs/sec', 'median across all tiers/sizes/concurrency'));
+  row.appendChild(statTile('io-threads=4', fmtNum(v4), 'msgs/sec', `${delta}% vs io-threads=1`));
+})();
+
+// ---------- full table ----------
+(function renderFullTable(){
+  const t = document.getElementById('full-table');
+  let html = '<thead><tr><th>System</th><th>Tier</th><th>Cpus</th><th>IO-thr</th><th>Size</th><th>Conc</th><th>Throughput (msgs/s)</th><th>p50 (ms)</th><th>p99 (ms)</th></tr></thead><tbody>';
+  DATA.table.forEach(r => {
+    html += `<tr><td><span class="dot${r.system==='redis'?' redis':''}">●</span> ${r.system}</td><td>${r.tier}</td><td>${r.cpus}</td><td>${r.io_threads||'—'}</td><td>${r.size}</td><td>${r.conc}</td><td>${r.throughput.toLocaleString()}</td><td>${fmtMs(r.p50_ms)}</td><td>${fmtMs(r.p99_ms)}</td></tr>`;
+  });
+  html += '</tbody>';
+  t.innerHTML = html;
+})();
+</script>
+</body>
+</html>
