@@ -48,7 +48,7 @@ NATS_CLIENT_CPUS=(0)        # benchmark client cpuset, reverse-indexed (0 = last
 # always single-threaded no matter how many cores REDIS_CPUS_PIN grants it —
 # IO_THREADS only parallelizes socket I/O (reading/writing the wire
 # protocol), never command processing. 1 = upstream default (disabled).
-REDIS_CPUS_PIN=(0-7)        # server cpuset -- TEMP: narrowed to backfill the missing 8-core config only; restore to (0 0-3 0-7) after this run
+REDIS_CPUS_PIN=(0 0-3 0-7)  # server cpuset
 REDIS_MEM=(16g)             # server memory limit; kept identical to NATS_MEM for parity
 REDIS_IO_THREADS=(1 4)      # io-threads count
 REDIS_CLIENT_CPUS=(0)       # benchmark client cpuset, reverse-indexed (0 = last core)

@@ -1,8 +1,9 @@
 # Future Improvements
 
-Additional use cases worth benchmarking beyond the current matrix (Publish +
-Stream, KV static, KV with expiry). Not yet implemented — candidates for a
-future round.
+Additional use cases worth benchmarking beyond [`publish-throughput/`](publish-throughput/README.md)
+(publish/append throughput and latency across durability tiers). Not yet
+implemented — candidates for a future round, each to live in its own
+top-level folder alongside `publish-throughput/`.
 
 | Use case | Why it matters | NATS mechanism | Redis mechanism |
 |---|---|---|---|
